@@ -1,0 +1,16 @@
+const r      = require("express").Router();
+const c      = require("../controllers/student");
+const multer = require("multer");
+const up     = multer({ storage: multer.memoryStorage() });
+const { protect, role } = require("../middleware/auth");
+r.get("/my-child",              protect, role("parent"),                  c.myChild);
+r.get("/",                      protect, role("principal","teacher"),     c.list);
+r.post("/",                     protect, role("principal"),               c.add);
+r.post("/bulk-upload",          protect, role("principal"), up.single("file"), c.bulkUpload);
+r.put("/promote-all",           protect, role("principal"),               c.promoteAll);
+r.get("/:id/credentials",       protect, role("principal"),               c.getCredentials);
+r.post("/:id/reset-password",   protect, role("principal"),               c.resetParentPassword);
+r.get("/:id",                   protect, role("principal","teacher"),     c.get);
+r.put("/:id",                   protect, role("principal"),               c.update);
+r.delete("/:id",                protect, role("principal"),               c.remove);
+module.exports = r;

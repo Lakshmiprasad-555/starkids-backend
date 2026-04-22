@@ -2,7 +2,7 @@ const ah         = require("../utils/async");
 const Student    = require("../models/Student");
 const User       = require("../models/User");
 const Attendance = require("../models/Attendance");
-const StudentFee  = require("../models/Fee");
+const {StudentFee } = require("../models/Fee");
 const Notice     = require("../models/Notice");
 const Homework   = require("../models/Homework");
 

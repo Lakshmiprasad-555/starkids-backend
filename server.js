@@ -14,6 +14,7 @@ const { notFound, errorHandler } = require("./middleware/error");
 const { startCron } = require("./utils/cron");
 
 const app = express();
+app.set('trust proxy', 1);
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")

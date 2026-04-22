@@ -1,7 +1,7 @@
 const express = require("express");
 const router  = express.Router();
-const Teacher = require("../models/teacher");
-const User    = require("../models/user");
+const Teacher = require("../models/Teacher");
+const User    = require("../models/User");
 const { protect, role } = require("../middleware/auth");
 const ctrl    = require("../controllers/teacher"); // ← ADD THIS
 

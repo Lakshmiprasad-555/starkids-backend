@@ -2,7 +2,7 @@ const ah         = require("../utils/async");
 const Student    = require("../models/Student");
 const User       = require("../models/User");
 const Attendance = require("../models/Attendance");
-const { FeeRecord } = require("../models/Fee");
+const { StudentFee } = require("../models/Fee");
 const Notice     = require("../models/Notice");
 const Homework   = require("../models/Homework");
 
@@ -13,7 +13,7 @@ exports.principal = ah(async (req, res) => {
     Student.countDocuments({ isActive: true }),
     User.countDocuments({ role: "teacher", isActive: true }),
     Attendance.find({ date: today }).lean(),
-    FeeRecord.countDocuments({ status: { $in: ["pending","partial"] } }),
+    StudentFee.countDocuments({ status: { $in: ["unpaid","partial"] } }),
     Notice.find({ isActive: true }).sort({ createdAt: -1 }).limit(5).lean(),
   ]);
   res.json({ success: true, data: { totalStudents, totalTeachers,
@@ -47,7 +47,7 @@ exports.parent = ah(async (req, res) => {
   const today = new Date(); today.setHours(0,0,0,0);
   const [att, fees, hw, notices] = await Promise.all([
     Attendance.findOne({ studentId: child._id, date: today }).lean(),
-    FeeRecord.find({ studentId: child._id, status: { $in: ["pending","partial"] } }).lean(),
+    StudentFee.find({ studentId: child._id, status: { $in: ["unpaid","partial"] } }).lean(),
     Homework.find({ classNo: child.class, isActive: true }).sort({ createdAt:-1 }).limit(5).lean(),
     Notice.find({ isActive: true, target: { $in: ["parents","all"] } }).sort({ createdAt:-1 }).limit(5).lean(),
   ]);

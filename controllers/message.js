@@ -65,7 +65,16 @@ exports.thread = ah(async (req, res) => {
 
 // ✅ Contacts — everyone sees everyone except themselves
 exports.contacts = ah(async (req, res) => {
-  const users = await User.find({ _id: { $ne: req.user._id } })
+  const myId   = req.user._id;
+  const myRole = req.user.role;
+
+  let filter = { _id: { $ne: myId }, isActive: true };
+
+  if (myRole === "parent") {
+    filter.role = { $in: ["principal", "teacher"] };
+  }
+
+  const users = await User.find(filter)
     .select("name role profilePhoto")
     .lean();
 

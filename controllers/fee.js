@@ -407,6 +407,55 @@ exports.myChildFees = ah(async (req, res) => {
   const feeMap = {};
   fees.forEach(f => { feeMap[f.studentId.toString()] = f; });
 
+  const data = children.map(c => {
+    const fee = feeMap[c._id.toString()];
+
+    if (!fee) {
+      return {
+        student:      c,
+        pendingFees:  [],
+        paidHistory:  [],
+        totalPaid:    0,
+        totalPending: 0,
+      };
+    }
+
+    const pendingFees = [];
+    if (!fee.waived && fee.balance > 0) {
+      pendingFees.push({
+        feeType:    "Annual School Fee",
+        month:      academicYear,
+        amount:     fee.annualAmount,
+        paidAmount: fee.amountPaid,
+        balance:    fee.balance,
+        status:     fee.status,
+      });
+    }
+
+    const paidHistory = (fee.payments || []).map((p, i) => ({
+      feeType:    "Fee Payment",
+      month:      new Date(p.date).toLocaleDateString("en-IN", { month: "short", year: "numeric" }),
+      receiptNo:  "RCP-" + String(i + 1).padStart(3, "0"),
+      paidAmount: p.amount,
+      note:       p.note || "",
+      date:       p.date,
+      recordedBy: p.recordedBy?.name || "",
+      status:     "paid",
+    }));
+
+    return {
+      student:      c,
+      pendingFees,
+      paidHistory,
+      totalPaid:    fee.amountPaid,
+      totalPending: fee.balance,
+      waived:       fee.waived,
+      waiverNote:   fee.waiverNote || "",
+    };
+  });
+
+  res.json({ success: true, data });
+});
   const data = children.map(c => ({
     student:      c,
     fee:          feeMap[c._id.toString()] || null,

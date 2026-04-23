@@ -148,27 +148,31 @@ exports.update = ah(async (req, res) => {
 
 // Remove Student
 exports.remove = ah(async (req, res) => {
-  const student = await Student.findByIdAndUpdate(
-    req.params.id,
-    { isActive: false },
-    { new: true }
-  );
+  const student = await Student.findById(req.params.id);
+  if (!student)
+    return res.status(404).json({ success: false, message: "Student not found" });
 
-  if (!student) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Student not found" });
-  }
+  student.isActive = false;
+  await student.save();
 
   if (student.parentId) {
-    await User.findByIdAndUpdate(student.parentId, {
-      isActive: false,
-    });
+    await User.findByIdAndUpdate(student.parentId, { isActive: false });
   }
 
-  res.json({ success: true, message: "Student removed" });
-});
+  const { StudentFee } = require("../models/Fee");
+  const Attendance     = require("../models/Attendance");
+  const ExamMark       = require("../models/ExamMark");
+  const Leave          = require("../models/Leave");
 
+  await Promise.all([
+    StudentFee.deleteMany({ studentId: student._id }),
+    Attendance.deleteMany({ studentId: student._id }),
+    ExamMark.deleteMany({ studentId: student._id }),
+    Leave.deleteMany({ studentId: student._id }),
+  ]);
+
+  res.json({ success: true, message: "Student and all related records removed" });
+});
 // Promote All
 exports.promoteAll = ah(async (req, res) => {
   const results = await Promise.all(

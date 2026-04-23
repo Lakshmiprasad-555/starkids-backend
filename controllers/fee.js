@@ -456,10 +456,4 @@ exports.myChildFees = ah(async (req, res) => {
 
   res.json({ success: true, data });
 });
-  const data = children.map(c => ({
-    student:      c,
-    fee:          feeMap[c._id.toString()] || null,
-  }));
-
-  res.json({ success: true, data });
-});
+  
